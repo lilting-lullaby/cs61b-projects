@@ -109,11 +109,53 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
+        board.setViewingPerspective(side);
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        for (int col = 0; col < board.size(); col++) {
+            for (int row = 3; row >= 0 ; row--) {
+                Tile T = board.tile(col, row);
+            }
+        }
 
+        for (int col = 0; col < board.size(); col++) {
+            int num_null_tile = 0;
+            int num_instanced_tile = 0;
+            int [] value_of_tile = new int [] {1,0,0,0,0};
+            int merged_ornot = 0;
+            int second_merge = 0;
+            int merged_num = 0;
+            for (int row = 3; row >= 0 ; row--) {
+                Tile T = board.tile(col, row);
+                //System.out.println("Checking (" + col + ", " + row + "): " + T);
+                if (T != null) {
+                    num_instanced_tile++;
+                    value_of_tile[num_instanced_tile] = T.value();
+                    if(value_of_tile[num_instanced_tile] == value_of_tile[num_instanced_tile - 1] && num_instanced_tile >= 1) {
+                    board.move( col, 3 - num_instanced_tile  + 1 + second_merge + 1, T);
+                    if(merged_num == 1 && second_merge == 0) { score -= 2 * value_of_tile[num_instanced_tile]; }
+                    score += 2 * value_of_tile[num_instanced_tile];
+                    merged_ornot++;
+                    if(merged_ornot == 2){
+                        second_merge = 1;
+                    } else if(merged_ornot == 1){
+                        merged_num = 1;
+                    }
+                    changed = true;
+                    } else {
+                        if( row == 3 - num_instanced_tile + merged_num + 1) { continue; }
+                        else {
+                        board.move(col, 3 - num_instanced_tile  + merged_num + 1 , T);
+                        changed = true;
+                        }
+                    }
+                } else {
+                    num_null_tile++;
+                }
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,6 +180,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int x = 0; x < b.size(); x++) {
+            for (int y = 0; y < b.size(); y++) {
+                //if (b.tile(x, y).value() == NULL) {
+                if (b.tile(x, y) == null) {  // you shuld check the tile otherwise tile(x,y),value() & NULL isn't a keyword in java
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -146,8 +196,18 @@ public class Model extends Observable {
      * Maximum valid value is given by MAX_PIECE. Note that
      * given a Tile object t, we get its value with t.value().
      */
+
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int x = 0; x < b.size(); x++) {
+            for (int y = 0; y < b.size(); y++) {
+                if (b.tile(x, y) != null) {
+                    if(b.tile(x,y).value() == MAX_PIECE) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -157,8 +217,25 @@ public class Model extends Observable {
      * 1. There is at least one empty space on the board.
      * 2. There are two adjacent tiles with the same value.
      */
-    public static boolean atLeastOneMoveExists(Board b) {
+    public static boolean  atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) { return true; }
+        // check col
+        for (int x = 0; x < b.size(); x++) {
+            for (int y = 0; y < b.size() - 1; y++) {
+                if (b.tile(x, y).value() == b.tile(x, y+1).value()) {
+                    return true;
+                }
+            }
+        }
+        //check row
+        for (int y = 0; y < b.size(); y++) {
+            for (int x = 0; x < b.size() - 1; x++) {
+                if (b.tile(x, y).value() == b.tile(x + 1, y).value()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

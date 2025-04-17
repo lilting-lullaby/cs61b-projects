@@ -11,7 +11,7 @@ import java.util.Random;
  * @author hug
  */
 public class Board implements Iterable<Tile> {
-    /** Current contents of the board. */
+    /** Current contents of the board. 2D arrry of Tile instance */
     private Tile[][] values;
     /** Side that the board currently views as north. */
     private Side viewPerspective;
